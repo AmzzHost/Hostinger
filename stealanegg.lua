@@ -341,6 +341,249 @@ local function enableFPSBoost()
                             Material = obj.Material,
                             Reflectance = obj.Reflectance,
                             Transparency = obj.Transparency,
+                            CastShadow = obj.CastShadow,
+                        }
+                    end
+                    obj.Material = Enum.Material.SmoothPlastic
+                    obj.Reflectance = 0
+                    obj.Transparency = 0.5
+                    obj.CastShadow = false
+                elseif obj:IsA("Decal") then
+                    obj.Transparency = 1
+                elseif obj:IsA("Texture") then
+                    obj.Transparency = 1
+                elseif obj:IsA("ParticleEmitter") then
+                    obj.Enabled = false
+                elseif obj:IsA("Trail") then
+                    obj.Enabled = false
+                elseif obj:IsA("Smoke") then
+                    obj.Enabled = false
+                elseif obj:IsA("Fire") then
+                    obj.Enabled = false
+                elseif obj:IsA("Sparkles") then
+                    obj.Enabled = false
+                end
+            end)
+        end
+
+        if currentCharacter then
+            local animator = currentCharacter:FindFirstChildOfClass("Animator")
+            if animator then
+                animator:Destroy()
+            end
+        end
+    end)
+end
+
+local function disableFPSBoost()
+    pcall(function()
+        for obj, data in pairs(originalParts) do
+            if obj and obj.Parent then
+                pcall(function()
+                    obj.Material = data.Material
+                    obj.Reflectance = data.Reflectance
+                    obj.Transparency = data.Transparency
+                    obj.CastShadow = data.CastShadow
+                end)
+            end
+        end
+        originalParts = {}
+
+        for _, obj in ipairs(game:GetDescendants()) do
+            pcall(function()
+                if obj:IsA("Decal") then
+                    obj.Transparency = 0
+                elseif obj:IsA("Texture") then
+                    obj.Transparency = 0
+                elseif obj:IsA("ParticleEmitter") then
+                    obj.Enabled = true
+                elseif obj:IsA("Trail") then
+                    obj.Enabled = true
+                elseif obj:IsA("Smoke") then
+                    obj.Enabled = true
+                elseif obj:IsA("Fire") then
+                    obj.Enabled = true
+                elseif obj:IsA("Sparkles") then
+                    obj.Enabled = true
+                end
+            end)
+        end
+    end)
+end
+
+FPSBoostToggle.MouseButton1Click:Connect(function()
+    FPSBoostEnabled = not FPSBoostEnabled
+    if FPSBoostEnabled then
+        FPSBoostToggle.Text = "ON"
+        FPSBoostToggle.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        enableFPSBoost()
+    else
+        FPSBoostToggle.Text = "OFF"
+        FPSBoostToggle.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        disableFPSBoost()
+    end
+end)
+
+local ConfirmFrame = Instance.new("Frame")
+ConfirmFrame.Name = "ConfirmFrame"
+ConfirmFrame.Size = UDim2.new(0, 260, 0, 130)
+ConfirmFrame.Position = UDim2.new(0.5, -130, 0.5, -65)
+ConfirmFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+ConfirmFrame.BorderSizePixel = 0
+ConfirmFrame.Visible = false
+ConfirmFrame.Active = true
+ConfirmFrame.ZIndex = 10
+ConfirmFrame.Parent = ScreenGui
+
+local ConfirmCorner = Instance.new("UICorner")
+ConfirmCorner.CornerRadius = UDim.new(0, 10)
+ConfirmCorner.Parent = ConfirmFrame
+
+local ConfirmStroke = Instance.new("UIStroke")
+ConfirmStroke.Color = Color3.fromRGB(0, 120, 255)
+ConfirmStroke.Thickness = 1.5
+ConfirmStroke.Parent = ConfirmFrame
+
+local ConfirmLabel = Instance.new("TextLabel")
+ConfirmLabel.Size = UDim2.new(1, -20, 0, 40)
+ConfirmLabel.Position = UDim2.new(0, 10, 0, 15)
+ConfirmLabel.BackgroundTransparency = 1
+ConfirmLabel.Text = "Out of script?"
+ConfirmLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ConfirmLabel.TextScaled = true
+ConfirmLabel.Font = Enum.Font.GothamBold
+ConfirmLabel.ZIndex = 11
+ConfirmLabel.Parent = ConfirmFrame
+
+local YesBtn = Instance.new("TextButton")
+YesBtn.Name = "YesBtn"
+YesBtn.Size = UDim2.new(0, 100, 0, 38)
+YesBtn.Position = UDim2.new(0, 20, 1, -55)
+YesBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+YesBtn.BorderSizePixel = 0
+YesBtn.Text = "Yes"
+YesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+YesBtn.TextScaled = true
+YesBtn.Font = Enum.Font.GothamBold
+YesBtn.AutoButtonColor = false
+YesBtn.ZIndex = 11
+YesBtn.Parent = ConfirmFrame
+
+local YesCorner = Instance.new("UICorner")
+YesCorner.CornerRadius = UDim.new(0, 6)
+YesCorner.Parent = YesBtn
+
+local NoBtn = Instance.new("TextButton")
+NoBtn.Name = "NoBtn"
+NoBtn.Size = UDim2.new(0, 100, 0, 38)
+NoBtn.Position = UDim2.new(1, -120, 1, -55)
+NoBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+NoBtn.BorderSizePixel = 0
+NoBtn.Text = "No"
+NoBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+NoBtn.TextScaled = true
+NoBtn.Font = Enum.Font.GothamBold
+NoBtn.AutoButtonColor = false
+NoBtn.ZIndex = 11
+NoBtn.Parent = ConfirmFrame
+
+local NoCorner = Instance.new("UICorner")
+NoCorner.CornerRadius = UDim.new(0, 6)
+NoCorner.Parent = NoBtn
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    ConfirmFrame.Visible = true
+end)
+
+YesBtn.MouseButton1Click:Connect(function()
+    if FPSBoostEnabled then
+        disableFPSBoost()
+    end
+    ScreenGui:Destroy()
+end)
+
+NoBtn.MouseButton1Click:Connect(function()
+    ConfirmFrame.Visible = false
+end)
+
+local dragging, dragInput, dragStart, startPos
+
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+TitleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement
+    or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+    end
+end)Corner = Instance.new("UICorner")
+FPSBoostCorner.CornerRadius = UDim.new(0, 6)
+FPSBoostCorner.Parent = FPSBoostRow
+
+local FPSBoostLabel = Instance.new("TextLabel")
+FPSBoostLabel.Size = UDim2.new(1, -100, 1, 0)
+FPSBoostLabel.Position = UDim2.new(0, 14, 0, 0)
+FPSBoostLabel.BackgroundTransparency = 1
+FPSBoostLabel.Text = "Anti Lag / FPS Boost 🚀"
+FPSBoostLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+FPSBoostLabel.TextSize = 16
+FPSBoostLabel.Font = Enum.Font.Gotham
+FPSBoostLabel.TextXAlignment = Enum.TextXAlignment.Left
+FPSBoostLabel.Parent = FPSBoostRow
+
+local FPSBoostToggle = Instance.new("TextButton")
+FPSBoostToggle.Size = UDim2.new(0, 70, 0, 30)
+FPSBoostToggle.Position = UDim2.new(1, -84, 0.5, -15)
+FPSBoostToggle.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+FPSBoostToggle.BorderSizePixel = 0
+FPSBoostToggle.Text = "OFF"
+FPSBoostToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+FPSBoostToggle.TextSize = 15
+FPSBoostToggle.Font = Enum.Font.GothamBold
+FPSBoostToggle.AutoButtonColor = false
+FPSBoostToggle.Parent = FPSBoostRow
+
+local FPSBoostToggleCorner = Instance.new("UICorner")
+FPSBoostToggleCorner.CornerRadius = UDim.new(0, 6)
+FPSBoostToggleCorner.Parent = FPSBoostToggle
+
+local originalParts = {}
+
+local function enableFPSBoost()
+    pcall(function()
+        for _, obj in ipairs(game:GetDescendants()) do
+            pcall(function()
+                if obj:IsA("BasePart") then
+                    if not originalParts[obj] then
+                        originalParts[obj] = {
+                            Material = obj.Material,
+                            Reflectance = obj.Reflectance,
+                            Transparency = obj.Transparency,
                         }
                     end
                     obj.Material = Enum.Material.SmoothPlastic
