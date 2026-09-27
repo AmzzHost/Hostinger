@@ -1,12 +1,8 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local Lighting = game:GetService("Lighting")
-local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
 
 local AntiRagdollEnabled = true
-local FPSBoostEnabled = false
 local frozen = false
 local frozenCFrame = nil
 local currentCharacter = nil
@@ -18,16 +14,6 @@ local RagdollStates = {
     [Enum.HumanoidStateType.FallingDown] = true,
     [Enum.HumanoidStateType.Physics] = true,
 }
-
-local function notify(msg)
-    pcall(function()
-        StarterGui:SetCore("SendNotification", {
-            Title = "Amzz Hub",
-            Text = msg,
-            Duration = 3,
-        })
-    end)
-end
 
 local function ProtectCharacter(character)
     local humanoid = character:WaitForChild("Humanoid", 10)
@@ -113,190 +99,35 @@ if LocalPlayer.Character then
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AmzzHub"
+ScreenGui.Name = "AmzzTestA"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.DisplayOrder = 999
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui", 10)
 
-local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Name = "ToggleBtn"
-ToggleBtn.Size = UDim2.new(0, 70, 0, 70)
-ToggleBtn.Position = UDim2.new(0, 30, 0, 150)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-ToggleBtn.BorderSizePixel = 0
-ToggleBtn.Text = "Amzz Hub"
-ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleBtn.TextScaled = true
-ToggleBtn.Font = Enum.Font.GothamBold
-ToggleBtn.AutoButtonColor = false
-ToggleBtn.Active = true
-ToggleBtn.Draggable = true
-ToggleBtn.Parent = ScreenGui
+local Btn = Instance.new("TextButton")
+Btn.Size = UDim2.new(0, 70, 0, 70)
+Btn.Position = UDim2.new(0, 30, 0, 150)
+Btn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+Btn.Text = "Tes A"
+Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+Btn.TextScaled = true
+Btn.Font = Enum.Font.GothamBold
+Btn.Parent = ScreenGui
 
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(1, 0)
-ToggleCorner.Parent = ToggleBtn
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(1, 0)
+Corner.Parent = Btn
 
-local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Color = Color3.fromRGB(0, 120, 255)
-ToggleStroke.Thickness = 2
-ToggleStroke.Parent = ToggleBtn
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 200, 0, 100)
+Frame.Position = UDim2.new(0.5, -100, 0.5, -50)
+Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+Frame.Visible = false
+Frame.Parent = ScreenGui
 
-local ToggleGradient = Instance.new("UIGradient")
-ToggleGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 40, 40)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255)),
-})
-ToggleGradient.Rotation = 45
-ToggleGradient.Parent = ToggleBtn
-
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 380, 0, 320)
-MainFrame.Position = UDim2.new(0.5, -190, 0.5, -160)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
-MainFrame.BorderSizePixel = 0
-MainFrame.Visible = false
-MainFrame.Active = true
-MainFrame.Parent = ScreenGui
-
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 10)
-MainCorner.Parent = MainFrame
-
-local MainStroke = Instance.new("UIStroke")
-MainStroke.Color = Color3.fromRGB(0, 120, 255)
-MainStroke.Thickness = 1.5
-MainStroke.Parent = MainFrame
-
-local TitleBar = Instance.new("Frame")
-TitleBar.Name = "TitleBar"
-TitleBar.Size = UDim2.new(1, 0, 0, 38)
-TitleBar.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-TitleBar.BorderSizePixel = 0
-TitleBar.Parent = MainFrame
-
-local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim.new(0, 10)
-TitleCorner.Parent = TitleBar
-
-local TitleFix = Instance.new("Frame")
-TitleFix.Size = UDim2.new(1, 0, 0, 14)
-TitleFix.Position = UDim2.new(0, 0, 1, -14)
-TitleFix.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-TitleFix.BorderSizePixel = 0
-TitleFix.Parent = TitleBar
-
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, -50, 1, 0)
-TitleLabel.Position = UDim2.new(0, 12, 0, 0)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "AMZZ HUB"
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextScaled = true
-TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.Parent = TitleBar
-
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Name = "CloseBtn"
-CloseBtn.Size = UDim2.new(0, 28, 0, 28)
-CloseBtn.Position = UDim2.new(1, -34, 0.5, -14)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-CloseBtn.BorderSizePixel = 0
-CloseBtn.Text = "X"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.TextScaled = true
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.AutoButtonColor = false
-CloseBtn.Parent = TitleBar
-
-local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(1, 0)
-CloseCorner.Parent = CloseBtn
-
-local ToolsLabel = Instance.new("TextLabel")
-ToolsLabel.Size = UDim2.new(1, -30, 0, 32)
-ToolsLabel.Position = UDim2.new(0, 15, 0, 50)
-ToolsLabel.BackgroundTransparency = 1
-ToolsLabel.Text = "TOOLS"
-ToolsLabel.TextColor3 = Color3.fromRGB(0, 170, 255)
-ToolsLabel.TextScaled = true
-ToolsLabel.Font = Enum.Font.GothamBold
-ToolsLabel.TextXAlignment = Enum.TextXAlignment.Left
-ToolsLabel.Parent = MainFrame
-
-local AntiRagdollRow = Instance.new("Frame")
-AntiRagdollRow.Size = UDim2.new(1, -30, 0, 44)
-AntiRagdollRow.Position = UDim2.new(0, 15, 0, 88)
-AntiRagdollRow.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
-AntiRagdollRow.BorderSizePixel = 0
-AntiRagdollRow.Parent = MainFrame
-
-local AntiRagdollCorner = Instance.new("UICorner")
-AntiRagdollCorner.CornerRadius = UDim.new(0, 6)
-AntiRagdollCorner.Parent = AntiRagdollRow
-
-local AntiRagdollLabel = Instance.new("TextLabel")
-AntiRagdollLabel.Size = UDim2.new(1, -100, 1, 0)
-AntiRagdollLabel.Position = UDim2.new(0, 14, 0, 0)
-AntiRagdollLabel.BackgroundTransparency = 1
-AntiRagdollLabel.Text = "Anti Ragdoll"
-AntiRagdollLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-AntiRagdollLabel.TextSize = 16
-AntiRagdollLabel.Font = Enum.Font.Gotham
-AntiRagdollLabel.TextXAlignment = Enum.TextXAlignment.Left
-AntiRagdollLabel.Parent = AntiRagdollRow
-
-local AntiRagdollToggle = Instance.new("TextButton")
-AntiRagdollToggle.Size = UDim2.new(0, 70, 0, 30)
-AntiRagdollToggle.Position = UDim2.new(1, -84, 0.5, -15)
-AntiRagdollToggle.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-AntiRagdollToggle.BorderSizePixel = 0
-AntiRagdollToggle.Text = "ON"
-AntiRagdollToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-AntiRagdollToggle.TextSize = 15
-AntiRagdollToggle.Font = Enum.Font.GothamBold
-AntiRagdollToggle.AutoButtonColor = false
-AntiRagdollToggle.Parent = AntiRagdollRow
-
-local AntiRagdollToggleCorner = Instance.new("UICorner")
-AntiRagdollToggleCorner.CornerRadius = UDim.new(0, 6)
-AntiRagdollToggleCorner.Parent = AntiRagdollToggle
-
-AntiRagdollToggle.MouseButton1Click:Connect(function()
-    AntiRagdollEnabled = not AntiRagdollEnabled
-    if AntiRagdollEnabled then
-        AntiRagdollToggle.Text = "ON"
-        AntiRagdollToggle.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        if currentHumanoid then
-            for state in pairs(RagdollStates) do
-                pcall(function() currentHumanoid:SetStateEnabled(state, false) end)
-            end
-        end
-        notify("Anti Ragdoll ON")
-    else
-        AntiRagdollToggle.Text = "OFF"
-        AntiRagdollToggle.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-        frozen = false
-        frozenCFrame = nil
-        if currentHumanoid then
-            for state in pairs(RagdollStates) do
-                pcall(function() currentHumanoid:SetStateEnabled(state, true) end)
-            end
-            pcall(function()
-                currentHumanoid.WalkSpeed = 16
-                currentHumanoid.JumpPower = 50
-            end)
-        end
-        notify("Anti Ragdoll OFF")
-    end
-end)
-
-local FPSBoostRow = Instance.new("Frame")
-FPSBoostRow.Size = UDim2.new(1, -30, 0, 44)
-FPSBoostRow.Position = UDim2.new(0, 15, 0, 140)
+Btn.MouseButton1Click:Connect(function()
+    Frame.Visible = not Frame.Visible
+end)40)
 FPSBoostRow.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
 FPSBoostRow.BorderSizePixel = 0
 FPSBoostRow.Parent = MainFrame
