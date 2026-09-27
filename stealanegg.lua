@@ -1,8 +1,89 @@
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 
-local IMAGE_URL = "https://cdn.jsdelivr.net/gh/AmzzHost/Hostinger@main/file_0000000064ac820baf633ea366e9a8ae.png"
+local AntiRagdollEnabled = true
+local FPSBoostEnabled = false
+
+local RagdollStates = {
+    [Enum.HumanoidStateType.Ragdoll] = true,
+    [Enum.HumanoidStateType.FallingDown] = true,
+    [Enum.HumanoidStateType.Physics] = true,
+}
+
+local currentCharacter = nil
+local currentHumanoid = nil
+local currentHRP = nil
+
+local function ProtectCharacter(character)
+    local humanoid = character:WaitForChild("Humanoid", 10)
+    local hrp = character:WaitForChild("HumanoidRootPart", 10)
+    if not humanoid or not hrp then return end
+
+    currentCharacter = character
+    currentHumanoid = humanoid
+    currentHRP = hrp
+
+    for state in pairs(RagdollStates) do
+        pcall(function() humanoid:SetStateEnabled(state, false) end)
+    end
+
+    RunService.RenderStepped:Connect(function()
+        if not AntiRagdollEnabled then return end
+        if not character.Parent or not humanoid.Parent then return end
+        pcall(function()
+            local s = humanoid:GetState()
+            if RagdollStates[s] then
+                humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+            end
+            if humanoid.PlatformStand then
+                humanoid.PlatformStand = false
+            end
+        end)
+    end)
+
+    RunService.Heartbeat:Connect(function()
+        if not AntiRagdollEnabled then return end
+        if not character.Parent then return end
+        pcall(function()
+            local vel = hrp.AssemblyLinearVelocity
+            if vel.Magnitude > 150 then
+                hrp.AssemblyLinearVelocity = Vector3.new(0, vel.Y, 0)
+            end
+        end)
+    end)
+
+    task.spawn(function()
+        while character.Parent do
+            if AntiRagdollEnabled then
+                pcall(function()
+                    for _, joint in ipairs(character:GetDescendants()) do
+                        if joint:IsA("Motor6D") and joint.Enabled == false then
+                            joint.Enabled = true
+                        end
+                    end
+                    for _, part in ipairs(character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                end)
+            end
+            task.wait()
+        end
+    end)
+end
+
+LocalPlayer.CharacterAdded:Connect(function(char)
+    task.wait(0.2)
+    ProtectCharacter(char)
+end)
+
+if LocalPlayer.Character then
+    ProtectCharacter(LocalPlayer.Character)
+end
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AmzzHub"
@@ -16,7 +97,10 @@ ToggleBtn.Size = UDim2.new(0, 70, 0, 70)
 ToggleBtn.Position = UDim2.new(0, 30, 0, 150)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 ToggleBtn.BorderSizePixel = 0
-ToggleBtn.Text = ""
+ToggleBtn.Text = "Amzz Hub"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.TextScaled = true
+ToggleBtn.Font = Enum.Font.GothamBold
 ToggleBtn.AutoButtonColor = false
 ToggleBtn.Active = true
 ToggleBtn.Draggable = true
@@ -39,23 +123,17 @@ ToggleGradient.Color = ColorSequence.new({
 ToggleGradient.Rotation = 45
 ToggleGradient.Parent = ToggleBtn
 
-local ToggleImage = Instance.new("ImageLabel")
-ToggleImage.Name = "ToggleImage"
-ToggleImage.Size = UDim2.new(1, 0, 1, 0)
-ToggleImage.BackgroundTransparency = 1
-ToggleImage.Image = IMAGE_URL
-ToggleImage.ScaleType = Enum.ScaleType.Fit
-ToggleImage.ZIndex = 2
-ToggleImage.Parent = ToggleBtn
-
-local ToggleImageCorner = Instance.new("UICorner")
-ToggleImageCorner.CornerRadius = UDim.new(1, 0)
-ToggleImageCorner.Parent = ToggleImage
+local TogglePadding = Instance.new("UIPadding")
+TogglePadding.PaddingTop = UDim.new(0, 6)
+TogglePadding.PaddingBottom = UDim.new(0, 6)
+TogglePadding.PaddingLeft = UDim.new(0, 4)
+TogglePadding.PaddingRight = UDim.new(0, 4)
+TogglePadding.Parent = ToggleBtn
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 380, 0, 280)
-MainFrame.Position = UDim2.new(0.5, -190, 0.5, -140)
+MainFrame.Size = UDim2.new(0, 380, 0, 320)
+MainFrame.Position = UDim2.new(0.5, -190, 0.5, -160)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
 MainFrame.BorderSizePixel = 0
 MainFrame.Visible = false
@@ -89,23 +167,9 @@ TitleFix.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 TitleFix.BorderSizePixel = 0
 TitleFix.Parent = TitleBar
 
-local TitleImage = Instance.new("ImageLabel")
-TitleImage.Name = "TitleImage"
-TitleImage.Size = UDim2.new(0, 26, 0, 26)
-TitleImage.Position = UDim2.new(0, 8, 0.5, -13)
-TitleImage.BackgroundTransparency = 1
-TitleImage.Image = IMAGE_URL
-TitleImage.ScaleType = Enum.ScaleType.Fit
-TitleImage.ZIndex = 2
-TitleImage.Parent = TitleBar
-
-local TitleImageCorner = Instance.new("UICorner")
-TitleImageCorner.CornerRadius = UDim.new(1, 0)
-TitleImageCorner.Parent = TitleImage
-
 local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, -90, 1, 0)
-TitleLabel.Position = UDim2.new(0, 42, 0, 0)
+TitleLabel.Size = UDim2.new(1, -50, 1, 0)
+TitleLabel.Position = UDim2.new(0, 12, 0, 0)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.Text = "AMZZ HUB"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -137,6 +201,202 @@ end)
 
 CloseBtn.MouseLeave:Connect(function()
     CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+end)
+
+local ToolsLabel = Instance.new("TextLabel")
+ToolsLabel.Size = UDim2.new(1, -30, 0, 30)
+ToolsLabel.Position = UDim2.new(0, 15, 0, 50)
+ToolsLabel.BackgroundTransparency = 1
+ToolsLabel.Text = "TOOLS"
+ToolsLabel.TextColor3 = Color3.fromRGB(0, 170, 255)
+ToolsLabel.TextScaled = true
+ToolsLabel.Font = Enum.Font.GothamBold
+ToolsLabel.TextXAlignment = Enum.TextXAlignment.Left
+ToolsLabel.Parent = MainFrame
+
+local AntiRagdollRow = Instance.new("Frame")
+AntiRagdollRow.Size = UDim2.new(1, -30, 0, 40)
+AntiRagdollRow.Position = UDim2.new(0, 15, 0, 85)
+AntiRagdollRow.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+AntiRagdollRow.BorderSizePixel = 0
+AntiRagdollRow.Parent = MainFrame
+
+local AntiRagdollCorner = Instance.new("UICorner")
+AntiRagdollCorner.CornerRadius = UDim.new(0, 6)
+AntiRagdollCorner.Parent = AntiRagdollRow
+
+local AntiRagdollLabel = Instance.new("TextLabel")
+AntiRagdollLabel.Size = UDim2.new(1, -100, 1, 0)
+AntiRagdollLabel.Position = UDim2.new(0, 12, 0, 0)
+AntiRagdollLabel.BackgroundTransparency = 1
+AntiRagdollLabel.Text = "Anti Ragdoll"
+AntiRagdollLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+AntiRagdollLabel.TextScaled = true
+AntiRagdollLabel.Font = Enum.Font.Gotham
+AntiRagdollLabel.TextXAlignment = Enum.TextXAlignment.Left
+AntiRagdollLabel.Parent = AntiRagdollRow
+
+local AntiRagdollToggle = Instance.new("TextButton")
+AntiRagdollToggle.Size = UDim2.new(0, 70, 0, 28)
+AntiRagdollToggle.Position = UDim2.new(1, -82, 0.5, -14)
+AntiRagdollToggle.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+AntiRagdollToggle.BorderSizePixel = 0
+AntiRagdollToggle.Text = "ON"
+AntiRagdollToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+AntiRagdollToggle.TextScaled = true
+AntiRagdollToggle.Font = Enum.Font.GothamBold
+AntiRagdollToggle.AutoButtonColor = false
+AntiRagdollToggle.Parent = AntiRagdollRow
+
+local AntiRagdollToggleCorner = Instance.new("UICorner")
+AntiRagdollToggleCorner.CornerRadius = UDim.new(0, 5)
+AntiRagdollToggleCorner.Parent = AntiRagdollToggle
+
+AntiRagdollToggle.MouseButton1Click:Connect(function()
+    AntiRagdollEnabled = not AntiRagdollEnabled
+    if AntiRagdollEnabled then
+        AntiRagdollToggle.Text = "ON"
+        AntiRagdollToggle.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        if currentHumanoid then
+            for state in pairs(RagdollStates) do
+                pcall(function() currentHumanoid:SetStateEnabled(state, false) end)
+            end
+        end
+    else
+        AntiRagdollToggle.Text = "OFF"
+        AntiRagdollToggle.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        if currentHumanoid then
+            for state in pairs(RagdollStates) do
+                pcall(function() currentHumanoid:SetStateEnabled(state, true) end)
+            end
+        end
+    end
+end)
+
+local FPSBoostRow = Instance.new("Frame")
+FPSBoostRow.Size = UDim2.new(1, -30, 0, 40)
+FPSBoostRow.Position = UDim2.new(0, 15, 0, 135)
+FPSBoostRow.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+FPSBoostRow.BorderSizePixel = 0
+FPSBoostRow.Parent = MainFrame
+
+local FPSBoostCorner = Instance.new("UICorner")
+FPSBoostCorner.CornerRadius = UDim.new(0, 6)
+FPSBoostCorner.Parent = FPSBoostRow
+
+local FPSBoostLabel = Instance.new("TextLabel")
+FPSBoostLabel.Size = UDim2.new(1, -100, 1, 0)
+FPSBoostLabel.Position = UDim2.new(0, 12, 0, 0)
+FPSBoostLabel.BackgroundTransparency = 1
+FPSBoostLabel.Text = "Anti Lag / FPS Boost 🚀"
+FPSBoostLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+FPSBoostLabel.TextScaled = true
+FPSBoostLabel.Font = Enum.Font.Gotham
+FPSBoostLabel.TextXAlignment = Enum.TextXAlignment.Left
+FPSBoostLabel.Parent = FPSBoostRow
+
+local FPSBoostToggle = Instance.new("TextButton")
+FPSBoostToggle.Size = UDim2.new(0, 70, 0, 28)
+FPSBoostToggle.Position = UDim2.new(1, -82, 0.5, -14)
+FPSBoostToggle.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+FPSBoostToggle.BorderSizePixel = 0
+FPSBoostToggle.Text = "OFF"
+FPSBoostToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+FPSBoostToggle.TextScaled = true
+FPSBoostToggle.Font = Enum.Font.GothamBold
+FPSBoostToggle.AutoButtonColor = false
+FPSBoostToggle.Parent = FPSBoostRow
+
+local FPSBoostToggleCorner = Instance.new("UICorner")
+FPSBoostToggleCorner.CornerRadius = UDim.new(0, 5)
+FPSBoostToggleCorner.Parent = FPSBoostToggle
+
+local originalSettings = {
+    GlobalShadows = Lighting.GlobalShadows,
+    FogEnd = Lighting.FogEnd,
+    FogStart = Lighting.FogStart,
+    Brightness = Lighting.Brightness,
+    Ambient = Lighting.Ambient,
+    OutdoorAmbient = Lighting.OutdoorAmbient,
+}
+
+local blurEffect = nil
+
+local function enableFPSBoost()
+    pcall(function()
+        Lighting.GlobalShadows = false
+        Lighting.FogEnd = 100000
+        Lighting.FogStart = 100000
+        Lighting.Brightness = 0
+        Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+        Lighting.OutdoorAmbient = Color3.fromRGB(0, 0, 0)
+
+        for _, v in ipairs(Lighting:GetChildren()) do
+            if v:IsA("BlurEffect") then
+                v:Destroy()
+            end
+        end
+
+        blurEffect = Instance.new("BlurEffect")
+        blurEffect.Size = 24
+        blurEffect.Parent = Lighting
+
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+        for _, obj in ipairs(game:GetDescendants()) do
+            pcall(function()
+                if obj:IsA("BasePart") then
+                    obj.Material = Enum.Material.SmoothPlastic
+                    obj.Reflectance = 0
+                elseif obj:IsA("Decal") then
+                    obj.Transparency = 0.7
+                elseif obj:IsA("Texture") then
+                    obj.Transparency = 0.7
+                elseif obj:IsA("ParticleEmitter") then
+                    obj.Enabled = false
+                elseif obj:IsA("Trail") then
+                    obj.Enabled = false
+                elseif obj:IsA("Smoke") then
+                    obj.Enabled = false
+                elseif obj:IsA("Fire") then
+                    obj.Enabled = false
+                elseif obj:IsA("Sparkles") then
+                    obj.Enabled = false
+                end
+            end)
+        end
+    end)
+end
+
+local function disableFPSBoost()
+    pcall(function()
+        Lighting.GlobalShadows = originalSettings.GlobalShadows
+        Lighting.FogEnd = originalSettings.FogEnd
+        Lighting.FogStart = originalSettings.FogStart
+        Lighting.Brightness = originalSettings.Brightness
+        Lighting.Ambient = originalSettings.Ambient
+        Lighting.OutdoorAmbient = originalSettings.OutdoorAmbient
+
+        if blurEffect then
+            blurEffect:Destroy()
+            blurEffect = nil
+        end
+
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+    end)
+end
+
+FPSBoostToggle.MouseButton1Click:Connect(function()
+    FPSBoostEnabled = not FPSBoostEnabled
+    if FPSBoostEnabled then
+        FPSBoostToggle.Text = "ON"
+        FPSBoostToggle.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        enableFPSBoost()
+    else
+        FPSBoostToggle.Text = "OFF"
+        FPSBoostToggle.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        disableFPSBoost()
+    end
 end)
 
 local ConfirmFrame = Instance.new("Frame")
@@ -215,6 +475,9 @@ CloseBtn.MouseButton1Click:Connect(function()
 end)
 
 YesBtn.MouseButton1Click:Connect(function()
+    if FPSBoostEnabled then
+        disableFPSBoost()
+    end
     ScreenGui:Destroy()
 end)
 
