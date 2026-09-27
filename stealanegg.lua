@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
-local IMAGE_URL = "https://raw.githubusercontent.com/AmzzHost/Hostinger/main/file_0000000064ac820baf633ea366e9a8ae.png"
+local IMAGE_URL = "https://cdn.jsdelivr.net/gh/AmzzHost/Hostinger@main/file_0000000064ac820baf633ea366e9a8ae.png"
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AmzzHub"
